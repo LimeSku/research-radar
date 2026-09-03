@@ -1,0 +1,54 @@
+name: Research sync
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: Optional topic slug
+        required: false
+        type: string
+      force:
+        description: Ignore configured cadences
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: research-radar-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      AI_PROVIDER: openai
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+      OPENALEX_EMAIL: ${{ vars.OPENALEX_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.6.14"
+          enable-cache: true
+      - run: uv sync --frozen --no-dev
+      - run: uv run --no-sync radar init-db
+      - name: Run due topics
+        if: github.event_name == 'schedule'
+        run: uv run --no-sync radar sync
+      - name: Run manually selected topics
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TOPIC: ${{ inputs.topic }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          args=()
+          if [ -n "$TOPIC" ]; then args+=(--topic "$TOPIC"); fi
+          if [ "$FORCE" = "true" ]; then args+=(--force); fi
+          uv run --no-sync radar sync "${args[@]}"

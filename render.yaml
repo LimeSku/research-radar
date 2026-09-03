@@ -1,0 +1,32 @@
+databases:
+  - name: research-radar-db
+    databaseName: research_radar
+    user: research_radar
+    plan: free
+    region: frankfurt
+
+services:
+  - type: web
+    name: research-radar
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    preDeployCommand: radar init-db
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: research-radar-db
+          property: connectionString
+      - key: AI_PROVIDER
+        value: openai
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENALEX_API_KEY
+        sync: false
+      - key: OPENALEX_EMAIL
+        sync: false
+      - key: ENABLE_PUBLIC_ASK
+        value: "false"
+      - key: SOURCE_REPOSITORY_URL
+        sync: false
