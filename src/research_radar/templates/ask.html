@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="ask-hero page-shell">
+    <p class="eyebrow"><span></span> Grounded research assistant</p>
+    <h1>Ask your research memory.</h1>
+    <p>Answers are synthesized only from indexed abstracts and always link back to their sources.</p>
+
+    <form class="ask-form" method="post" action="/ask">
+      <label for="question">Research question</label>
+      <textarea id="question" name="question" minlength="3" maxlength="500" required placeholder="What are the main approaches to evaluating agent reliability?">{{ question }}</textarea>
+      <div>
+        <select name="topic" aria-label="Limit answer to a topic">
+          <option value="">Search every topic</option>
+          {% for topic in topics %}
+            <option value="{{ topic.slug }}" {% if selected_topic == topic.slug %}selected{% endif %}>{{ topic.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="button primary" type="submit" {% if not ask_enabled %}disabled{% endif %}>Ask Research Radar</button>
+      </div>
+    </form>
+    {% if not ask_enabled %}
+      <p class="budget-notice">Public Q&amp;A is disabled on this deployment. Set <code>ENABLE_PUBLIC_ASK=true</code> to enable it.</p>
+    {% endif %}
+  </section>
+
+  {% if error %}<div class="alert page-shell">{{ error }}</div>{% endif %}
+
+  {% if answer %}
+    <section class="answer-grid page-shell">
+      <article class="answer-card">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Research agent</p><h2>Synthesis</h2></div>
+          <span class="confidence confidence-{{ answer.confidence }}">{{ answer.confidence }} confidence</span>
+        </div>
+        <p class="answer-text">{{ answer.answer }}</p>
+        {% if answer.caveats %}
+          <div class="caveats"><strong>Caveats</strong><ul>{% for item in answer.caveats %}<li>{{ item }}</li>{% endfor %}</ul></div>
+        {% endif %}
+      </article>
+      <aside class="sources-card">
+        <h2>Retrieved evidence</h2>
+        {% for source in sources %}
+          <a href="/papers/{{ source.id }}" class="source-item {% if source.cited %}cited{% endif %}">
+            <span>[{{ source.citation_id }}]</span>
+            <div><strong>{{ source.title }}</strong><small>{{ source.published_at|date }} · {{ source.topic_slug|replace('-', ' ')|title }}</small></div>
+          </a>
+        {% endfor %}
+      </aside>
+    </section>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="page-heading page-shell">
+    <p class="eyebrow"><span></span> Pipeline observability</p>
+    <h1>Monitoring runs</h1>
+    <p>Every collection, agent decision and model cost remains inspectable.</p>
+  </section>
+
+  <section class="runs-panel page-shell">
+    {% if runs %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Run</th><th>Topic</th><th>Status</th><th>Started</th><th>Flow</th><th>Tokens</th><th>Est. cost</th></tr></thead>
+          <tbody>
+            {% for run in runs %}
+              <tr>
+                <td>#{{ run.id }}</td>
+                <td><strong>{{ run.topic_slug|replace('-', ' ')|title }}</strong><small>{{ run.source }}</small></td>
+                <td><span class="run-status status-{{ run.status }}">{{ run.status }}</span></td>
+                <td>{{ run.started_at|datetime }}</td>
+                <td><strong>{{ run.fetched_count }}</strong> fetched → <strong>{{ run.indexed_count }}</strong> indexed → <strong>{{ run.summarized_count }}</strong> briefs</td>
+                <td>{{ (run.input_tokens + run.output_tokens + run.embedding_tokens)|compact }}</td>
+                <td>${{ "%.4f"|format(run.estimated_cost_usd) }}</td>
+              </tr>
+              {% if run.error %}<tr class="error-row"><td colspan="7">{{ run.error }}</td></tr>{% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state"><h3>No runs recorded</h3><p>Run <code>radar sync --force</code> to start the pipeline.</p></div>
+    {% endif %}
+  </section>
+{% endblock %}

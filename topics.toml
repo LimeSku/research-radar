@@ -1,0 +1,33 @@
+[[topics]]
+slug = "agentic-ai"
+name = "Agentic AI"
+description = "Planning, tool use, memory, orchestration, and multi-agent systems."
+query = "AI agents tool use planning memory multi-agent systems"
+cadence_hours = 6
+lookback_days = 14
+max_candidates = 30
+summarize_top = 5
+min_relevance_score = 60
+
+[[topics]]
+slug = "llm-evaluation"
+name = "LLM Evaluation"
+description = "Benchmarks, evaluation methods, judges, reliability, and safety."
+query = "large language model evaluation benchmarks LLM judge reliability"
+cadence_hours = 12
+lookback_days = 14
+max_candidates = 25
+summarize_top = 5
+min_relevance_score = 60
+
+[[topics]]
+slug = "retrieval-augmented-generation"
+name = "Retrieval-Augmented Generation"
+description = "Retrieval, reranking, grounding, and knowledge-intensive language models."
+query = "retrieval augmented generation RAG reranking grounded language models"
+cadence_hours = 12
+lookback_days = 14
+max_candidates = 25
+summarize_top = 5
+min_relevance_score = 60
+

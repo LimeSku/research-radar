@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Agentic scientific literature monitoring and research memory.">
+    <title>{{ page_title }} · Research Radar</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Research Radar home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>Research <strong>Radar</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="/" {% if current_path == '/' %}aria-current="page"{% endif %}>Digest</a>
+        <a href="/ask" {% if current_path == '/ask' %}aria-current="page"{% endif %}>Ask</a>
+        <a href="/runs" {% if current_path == '/runs' %}aria-current="page"{% endif %}>Runs</a>
+      </nav>
+      {% if source_repository_url %}
+        <a class="github-link" href="{{ source_repository_url }}" target="_blank" rel="noreferrer">
+          View source <span aria-hidden="true">↗</span>
+        </a>
+      {% endif %}
+    </header>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+    <footer>
+      <p>Research Radar · Evidence-first research intelligence</p>
+      <p>Built with OpenAlex, configurable AI providers, PostgreSQL and pgvector.</p>
+    </footer>
+  </body>
+</html>

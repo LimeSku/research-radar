@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero page-shell">
+    <div>
+      <p class="eyebrow"><span></span> Autonomous research intelligence</p>
+      <h1>Stay current.<br><em>Keep the context.</em></h1>
+      <p class="hero-copy">
+        AI agents discover, evaluate and explain the scientific work that matters—then
+        turn it into a research memory you can query.
+      </p>
+    </div>
+    <div class="status-card">
+      <div class="status-row">
+        <span class="live-dot"></span>
+        <div><strong>Monitoring active</strong><small>{{ topics|length }} research topics</small></div>
+      </div>
+      {% if latest_run %}
+        <dl>
+          <div><dt>Last run</dt><dd>{{ latest_run.started_at|datetime }}</dd></div>
+          <div><dt>Documents</dt><dd>{{ latest_run.fetched_count }} fetched</dd></div>
+          <div><dt>Status</dt><dd class="status-{{ latest_run.status }}">{{ latest_run.status }}</dd></div>
+        </dl>
+      {% else %}
+        <p class="muted">Waiting for the first synchronization.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="metrics page-shell" aria-label="Knowledge base metrics">
+    <article><span>Knowledge base</span><strong>{{ metrics.papers|compact }}</strong><small>publications</small></article>
+    <article><span>Fresh this week</span><strong>{{ metrics.published_this_week|compact }}</strong><small>topic matches</small></article>
+    <article><span>Agent briefs</span><strong>{{ metrics.summaries|compact }}</strong><small>structured summaries</small></article>
+    <article><span>Avg. relevance</span><strong>{{ metrics.average_relevance }}<sup>%</sup></strong><small>curator score</small></article>
+  </section>
+
+  <section class="feed page-shell">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Latest intelligence</p>
+        <h2>Research digest</h2>
+      </div>
+      <label class="saved-filter"><input type="checkbox" id="saved-only"> Saved only</label>
+    </div>
+
+    <form class="filters" method="get" action="/">
+      <label>
+        <span class="sr-only">Search publications</span>
+        <input type="search" name="q" value="{{ query }}" placeholder="Search titles and abstracts…">
+      </label>
+      <label>
+        <span class="sr-only">Filter by topic</span>
+        <select name="topic">
+          <option value="">All topics</option>
+          {% for topic in topics %}
+            <option value="{{ topic.slug }}" {% if selected_topic == topic.slug %}selected{% endif %}>{{ topic.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="button secondary" type="submit">Filter</button>
+    </form>
+
+    {% if papers %}
+      <div class="paper-list">
+        {% for paper in papers %}
+          <article class="paper-card" data-paper-id="{{ paper.id }}">
+            <div class="paper-meta">
+              <span class="topic-pill">{{ topics_by_slug[paper.topic_slug].name if topics_by_slug is defined else paper.topic_slug|replace('-', ' ')|title }}</span>
+              <span>{{ paper.published_at|date }}</span>
+              {% if paper.venue %}<span>{{ paper.venue }}</span>{% endif %}
+            </div>
+            <div class="paper-grid">
+              <div>
+                <h3><a href="/papers/{{ paper.id }}">{{ paper.title }}</a></h3>
+                <p class="authors">{{ paper.authors[:4]|join(', ') }}{% if paper.authors|length > 4 %} et al.{% endif %}</p>
+                {% if paper.summary %}
+                  <p class="tldr">{{ paper.summary.tldr }}</p>
+                {% else %}
+                  <p class="tldr muted">Indexed for search. No agent brief was requested for this paper.</p>
+                {% endif %}
+                {% if paper.tags %}
+                  <div class="tags">{% for tag in paper.tags[:5] %}<span>{{ tag }}</span>{% endfor %}</div>
+                {% endif %}
+              </div>
+              <aside>
+                {% if paper.relevance_score is not none %}
+                  <div class="score" style="--score: {{ paper.relevance_score }}%">
+                    <strong>{{ paper.relevance_score }}</strong><span>relevance</span>
+                  </div>
+                {% endif %}
+                <button class="save-button" type="button" data-save="{{ paper.id }}" aria-label="Save paper">☆</button>
+              </aside>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-radar" aria-hidden="true"></span>
+        <h3>No publications on the radar yet</h3>
+        {% if query or selected_topic %}
+          <p>Try a broader search or clear the topic filter.</p>
+          <a class="button secondary" href="/">Clear filters</a>
+        {% else %}
+          <p>Run <code>radar sync --force</code> to build the first digest.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

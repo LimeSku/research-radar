@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+  <article class="paper-page page-shell" data-paper-id="{{ paper.id }}">
+    <a class="back-link" href="/">← Back to digest</a>
+    <div class="paper-title-row">
+      <div>
+        <div class="paper-meta">
+          <span>{{ paper.published_at|date }}</span>
+          {% if paper.venue %}<span>{{ paper.venue }}</span>{% endif %}
+          <span>{{ paper.cited_by_count|compact }} citations</span>
+        </div>
+        <h1>{{ paper.title }}</h1>
+        <p class="authors">{{ paper.authors|join(', ') }}</p>
+      </div>
+      <button class="save-button large" type="button" data-save="{{ paper.id }}" aria-label="Save paper">☆</button>
+    </div>
+
+    <div class="paper-actions">
+      <a class="button primary" href="{{ paper.source_url }}" target="_blank" rel="noreferrer">View source ↗</a>
+      {% if paper.pdf_url %}<a class="button secondary" href="{{ paper.pdf_url }}" target="_blank" rel="noreferrer">Open PDF ↗</a>{% endif %}
+      {% if paper.doi %}<span class="doi">{{ paper.doi|replace('https://doi.org/', 'doi:') }}</span>{% endif %}
+    </div>
+
+    {% set insight = paper.summary_topic %}
+    <div class="detail-grid">
+      <section class="summary-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Analyst agent</p><h2>Research brief</h2></div>
+          {% if insight.relevance_score is not none %}<span class="big-score">{{ insight.relevance_score }}%</span>{% endif %}
+        </div>
+        {% if insight.summary %}
+          <p class="evidence-label">Abstract-based analysis</p>
+          <p class="lead-summary">{{ insight.summary.tldr }}</p>
+          <div class="summary-sections">
+            <section><h3>Problem</h3><p>{{ insight.summary.problem }}</p></section>
+            <section><h3>Approach</h3><p>{{ insight.summary.approach }}</p></section>
+            <section>
+              <h3>Key findings</h3>
+              <ul>{% for item in insight.summary.findings %}<li>{{ item }}</li>{% endfor %}</ul>
+            </section>
+            <section>
+              <h3>Limitations</h3>
+              <ul>{% for item in insight.summary.limitations %}<li>{{ item }}</li>{% endfor %}</ul>
+            </section>
+            <section><h3>Why it matters</h3><p>{{ insight.summary.why_it_matters }}</p></section>
+          </div>
+          <div class="tags">{% for tag in insight.tags %}<span>{{ tag }}</span>{% endfor %}</div>
+        {% else %}
+          <p class="muted">This paper is indexed but was not selected for an agent brief.</p>
+        {% endif %}
+      </section>
+
+      <aside class="context-panel">
+        <h2>Curator context</h2>
+        {% for item in paper.topics %}
+          <section>
+            <span class="topic-pill">{{ item.topic_slug|replace('-', ' ')|title }}</span>
+            {% if item.curation_reason %}<p>{{ item.curation_reason }}</p>{% endif %}
+            <small>{{ item.processing_status }}{% if item.relevance_score is not none %} · {{ item.relevance_score }}% relevance{% endif %}</small>
+          </section>
+        {% endfor %}
+        <h2>Source abstract</h2>
+        <p class="abstract">{{ paper.abstract }}</p>
+        {% if paper.oa_license %}<small>Open-access license: {{ paper.oa_license }}</small>{% endif %}
+      </aside>
+    </div>
+  </article>
+{% endblock %}
