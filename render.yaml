@@ -12,7 +12,6 @@ services:
     plan: free
     region: frankfurt
     healthCheckPath: /health
-    preDeployCommand: radar init-db
     envVars:
       - key: DATABASE_URL
         fromDatabase:
