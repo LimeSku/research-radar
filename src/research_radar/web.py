@@ -188,11 +188,8 @@ def ask(
             for index, source in enumerate(matches, start=1)
         ]
         answer, _ = agent.answer(question, agent_sources)
-        valid_citations = {
-            citation for citation in answer.citations if 1 <= citation <= len(matches)
-        }
         display_sources = [
-            {**source, "citation_id": index, "cited": index in valid_citations}
+            {**source, "citation_id": index, "cited": index in answer.citations}
             for index, source in enumerate(matches, start=1)
         ]
         return render(
